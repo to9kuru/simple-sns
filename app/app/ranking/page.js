@@ -11,21 +11,19 @@ setPosts(JSON.parse(localStorage.getItem("posts") || "[]"));
 }, []);
 
 
-const top = [...posts].sort((a, b) => b.likes - a.likes);
+const sorted = [...posts].sort((a, b) => b.likes - a.likes);
 
 
 return (
-<main>
 <div className="glass">
 <h1>⭐ いいねランキング</h1>
-{top.map((p) => (
-<div key={p.id} style={{ marginBottom: 10 }}>
+{sorted.map((p) => (
+<div key={p.id}>
 <a href={`/post/${p.id}`}>{p.text}</a>
 <div>👍 {p.likes}</div>
 </div>
 ))}
+<a href="/" style={{ display: "block", marginTop: 20 }}>← 戻る</a>
 </div>
-<a href="/" style={{ marginTop: 20, display: "block" }}>← 戻る</a>
-</main>
 );
 }
