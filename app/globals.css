@@ -36,3 +36,12 @@ padding: 10px 16px;
 border-radius: 14px;
 backdrop-filter: blur(10px);
 }
+.glass {
+  backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 16px;
+  margin-bottom: 16px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
