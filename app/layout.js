@@ -1,3 +1,5 @@
+import "./globals.css";
+
 export const metadata = {
   title: "Simple SNS",
 };
@@ -5,25 +7,24 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="ja">
-      <body className="min-h-screen bg-gray-100 text-black">
-
-        <header className="w-full backdrop-blur-xl bg-white/30 border-b border-white/20 sticky top-0 z-50">
-          <nav className="max-w-3xl mx-auto flex items-center justify-between p-4">
-            <a href="/" className="font-semibold">Simple SNS</a>
-            <div className="flex items-center gap-4 text-sm">
-              <a href="/ranking" className="hover:underline">ランキング</a>
-              <a href="/settings" className="hover:underline">設定</a>
+      <body>
+        <div className="container">
+          <header className="header">
+            <div className="glass glass-sm header-inner">
+              <a href="/" style={{ fontWeight: 700 }}>Simple SNS</a>
+              <div className="row">
+                <a href="/ranking" style={{ padding: "6px 8px" }}>⭐ ランキング</a>
+                <a href="/settings" style={{ padding: "6px 8px" }}>設定</a>
+              </div>
             </div>
-          </nav>
-        </header>
+          </header>
 
-        <main className="max-w-3xl mx-auto mt-6 p-4 glass">
-          {children}
-        </main>
+          <main>{children}</main>
 
-        <footer className="text-center text-xs text-gray-500 py-6">
-          © Simple SNS
-        </footer>
+          <footer className="center">
+            <div style={{ marginTop: 20 }}>© Simple SNS</div>
+          </footer>
+        </div>
       </body>
     </html>
   );
