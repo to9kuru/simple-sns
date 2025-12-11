@@ -1,3 +1,5 @@
+import "../styles/globals.css";
+
 export const metadata = {
   title: "Simple SNS",
 };
@@ -16,6 +18,7 @@ export default function RootLayout({ children }) {
               ナイスすぎランキング
             </a>
           </header>
+
           {children}
         </div>
       </body>
