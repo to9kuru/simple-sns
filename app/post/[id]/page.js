@@ -1,76 +1,92 @@
 "use client";
+const [posts, setPosts] = useState([]);
+const [reply, setReply] = useState("");
 
-import { useState, useEffect } from "react";
 
-export default function PostDetail({ params }) {
-  const id = parseInt(params.id);
-  const [post, setPost] = useState(null);
-  const [reply, setReply] = useState("");
+useEffect(() => {
+const saved = JSON.parse(localStorage.getItem("posts") || "[]");
+setPosts(saved);
+setPost(saved.find((p) => p.id === id));
+}, [id]);
 
-  useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem("posts") || "[]");
-    const found = saved.find((p) => p.id === id);
-    setPost(found);
-  }, [id]);
 
-  const addReply = () => {
-    if (!reply.trim()) return;
-    const saved = JSON.parse(localStorage.getItem("posts") || "[]");
+const savePosts = (data) => {
+setPosts(data);
+setPost(data.find((p) => p.id === id));
+localStorage.setItem("posts", JSON.stringify(data));
+};
 
-    const newPosts = saved.map((p) =>
-      p.id === id
-        ? {
-            ...p,
-            replies: [
-              {
-                text: reply,
-                created: new Date().toISOString(),
-              },
-              ...(p.replies || []),
-            ],
-          }
-        : p
-    );
 
-    localStorage.setItem("posts", JSON.stringify(newPosts));
-    setPost(newPosts.find((p) => p.id === id));
-    setReply("");
-  };
+const addReply = () => {
+if (!reply.trim()) return;
 
-  if (!post) return <p>読み込み中…</p>;
 
-  return (
-    <main>
-      <h1>投稿詳細</h1>
-      <p>{post.text}</p>
+const newPosts = posts.map((p) =>
+p.id === id
+? {
+...p,
+replies: [
+{ text: reply, likes: 0, created: new Date().toISOString() },
+...p.replies,
+],
+}
+: p
+);
 
-      <h2>返信を書く</h2>
-      <textarea
-        value={reply}
-        onChange={(e) => setReply(e.target.value)}
-        rows={3}
-      />
-      <br />
-      <button onClick={addReply}>返信</button>
 
-      <h2>返信一覧</h2>
-      {post.replies?.map((r, index) => (
-        <div
-          key={index}
-          style={{
-            background: "#fff",
-            padding: "8px",
-            margin: "10px 0",
-            borderRadius: "6px",
-          }}
-        >
-          {r.text}
-        </div>
-      ))}
+savePosts(newPosts);
+setReply("");
+};
 
-      <a href="/" style={{ display: "block", marginTop: "20px" }}>
-        ← タイムラインへ戻る
-      </a>
-    </main>
-  );
+
+const likeReply = (index) => {
+const newPosts = posts.map((p) => {
+if (p.id !== id) return p;
+const newReplies = [...p.replies];
+newReplies[index].likes += 1;
+return { ...p, replies: newReplies };
+});
+savePosts(newPosts);
+};
+
+
+if (!post) return <p>読み込み中…</p>;
+
+
+return (
+<main>
+<div className="glass">
+<h2>投稿</h2>
+<p>{post.text}</p>
+</div>
+
+
+<div className="glass" style={{ marginTop: 20 }}>
+<h3>返信を書く</h3>
+<textarea
+value={reply}
+onChange={(e) => setReply(e.target.value)}
+rows={3}
+style={{ width: "100%" }}
+/>
+<button onClick={addReply}>返信</button>
+</div>
+
+
+<div style={{ marginTop: 20 }}>
+<h3>返信一覧</h3>
+{post.replies.map((r, i) => (
+<div className="glass" key={i} style={{ marginBottom: 12 }}>
+{r.text}
+<div>
+<button onClick={() => likeReply(i)}>👍 {r.likes}</button>
+</div>
+</div>
+))}
+</div>
+
+
+<a href="/" style={{ marginTop: 30, display: "block" }}>← 戻る</a>
+</main>
+);
 }
