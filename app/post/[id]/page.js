@@ -80,3 +80,20 @@ style={{ width: "100%" }}
 <div className="glass" key={i}>
 {r.text}
 <div>
+{post.replies
+  .slice()
+  .reverse()
+  .map((r, i) => (
+    <div className="glass p-3 mb-3 rounded-xl border border-white/20 shadow-sm" key={i}>
+      <div className="text-sm">{r.text}</div>
+
+      <div className="flex items-center gap-2 mt-2">
+        <button
+          onClick={() => toggleReplyLike(id, i)}
+          className="px-2 py-1 text-xs rounded-md backdrop-blur-md bg-white/30 border border-white/20 shadow"
+        >
+          ❤️ {r.likes}
+        </button>
+      </div>
+    </div>
+  ))}
