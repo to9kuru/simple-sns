@@ -1,94 +1,143 @@
 "use client";
-import { useState, useEffect } from "react";
-
-const STORAGE_KEY = "simple_sns_posts_v1";
-
-function ensurePostShape(post) {
-  return {
-    id: post.id ?? Date.now(),
-    text: post.text ?? "",
-    likes: typeof post.likes === "number" ? post.likes : 0,
-    replies: Array.isArray(post.replies) ? post.replies : [],
-    created: post.created ?? new Date().toISOString(),
-  };
-}
+import { useEffect, useState } from "react";
 
 export default function Home() {
   const [posts, setPosts] = useState([]);
   const [text, setText] = useState("");
+  const [replyText, setReplyText] = useState("");
+  const [activePost, setActivePost] = useState(null);
 
   useEffect(() => {
-    try {
-      const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-      setPosts(raw.map(ensurePostShape));
-    } catch {
-      setPosts([]);
-    }
+    const saved = JSON.parse(localStorage.getItem("posts") || "[]");
+    setPosts(saved);
   }, []);
 
-  const savePosts = (next) => {
-    const normalized = next.map(ensurePostShape);
-    setPosts(normalized);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
+  const save = (data) => {
+    setPosts(data);
+    localStorage.setItem("posts", JSON.stringify(data));
   };
 
   const addPost = () => {
     if (!text.trim()) return;
     const newPost = {
       id: Date.now(),
-      text: text.trim(),
+      text,
       likes: 0,
       replies: [],
       created: new Date().toISOString(),
     };
-    savePosts([newPost, ...posts]);
+    save([newPost, ...posts]);
     setText("");
   };
 
-  const likePost = (id) => {
-    savePosts(posts.map((p) => (p.id === id ? { ...p, likes: p.likes + 1 } : p)));
+  const togglePostLike = (id) => {
+    const newData = posts.map((p) =>
+      p.id === id ? { ...p, likes: p.likes + 1 } : p
+    );
+    save(newData);
   };
 
-  const top5 = [...posts].sort((a, b) => b.likes - a.likes).slice(0, 5);
+  const addReply = (postId) => {
+    if (!replyText.trim()) return;
+    const newData = posts.map((p) =>
+      p.id === postId
+        ? {
+            ...p,
+            replies: [
+              {
+                text: replyText,
+                likes: 0,
+                created: new Date().toISOString(),
+              },
+              ...p.replies,
+            ],
+          }
+        : p
+    );
+    save(newData);
+    setReplyText("");
+  };
+
+  const likeReply = (postId, index) => {
+    const newData = posts.map((p) => {
+      if (p.id !== postId) return p;
+      const r = [...p.replies];
+      r[index].likes += 1;
+      return { ...p, replies: r };
+    });
+    save(newData);
+  };
 
   return (
-    <>
-      <div className="glass">
-        <h2>新規投稿</h2>
-        <textarea rows={3} value={text} onChange={(e) => setText(e.target.value)} />
-        <div style={{ marginTop: 8 }}>
-          <button onClick={addPost}>投稿</button>
-        </div>
+    <div className="space-y-4">
+
+      {/* 投稿入力 */}
+      <div className="glass p-4 rounded-xl">
+        <textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          rows={3}
+          className="w-full"
+          placeholder="いまどうしてる？"
+        />
+        <button onClick={addPost} className="glass-btn mt-2">
+          投稿
+        </button>
       </div>
 
-      <div className="glass">
-        <h3>🔥 いいねトップ5</h3>
-        {top5.length === 0 ? (
-          <div className="post-meta">投稿がありません</div>
-        ) : (
-          top5.map((p) => (
-            <div key={p.id} className="glass-sm post-card" style={{ marginBottom: 8 }}>
-              <a href={`/post/${p.id}`}>{p.text}</a>
-              <div className="post-meta">👍 {p.likes}</div>
-            </div>
-          ))
-        )}
-      </div>
-
-      <h3 style={{ marginTop: 8 }}>タイムライン（新しい順）</h3>
-      {posts.length === 0 && <div className="post-meta">まだ投稿がありません</div>}
+      {/* 投稿一覧 */}
       {posts.map((p) => (
-        <div key={p.id} className="glass post-card">
+        <div key={p.id} className="glass p-4 rounded-xl">
           <div>{p.text}</div>
-          <div className="post-meta flex-between">
-            <div className="row">
-              <button onClick={() => likePost(p.id)}>👍 {p.likes}</button>
-              <a href={`/post/${p.id}`} style={{ marginLeft: 10 }}>返信を見る</a>
+
+          <div className="flex gap-2 mt-3">
+            <button onClick={() => togglePostLike(p.id)} className="glass-btn">
+              ❤️ {p.likes}
+            </button>
+            <button
+              className="glass-btn"
+              onClick={() =>
+                setActivePost(activePost === p.id ? null : p.id)
+              }
+            >
+              💬 返信
+            </button>
+          </div>
+
+          {/* 返信欄（ページ遷移なし） */}
+          {activePost === p.id && (
+            <div className="mt-3 space-y-3">
+              <textarea
+                value={replyText}
+                onChange={(e) => setReplyText(e.target.value)}
+                rows={2}
+                className="w-full"
+              />
+              <button
+                onClick={() => addReply(p.id)}
+                className="glass-btn w-full"
+              >
+                返信する
+              </button>
             </div>
-            <div style={{ fontSize: 12, color: "#64748b" }}>{new Date(p.created).toLocaleString()}</div>
+          )}
+
+          {/* 返信一覧 */}
+          <div className="mt-4 space-y-2">
+            {p.replies.map((r, i) => (
+              <div key={i} className="glass p-3 rounded-lg">
+                <div>{r.text}</div>
+                <button
+                  onClick={() => likeReply(p.id, i)}
+                  className="glass-btn mt-1"
+                >
+                  ❤️ {r.likes}
+                </button>
+              </div>
+            ))}
           </div>
         </div>
       ))}
-    </>
+    </div>
   );
 }
