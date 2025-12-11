@@ -1,4 +1,6 @@
 "use client";
+const id = parseInt(params.id);
+const [post, setPost] = useState(null);
 const [posts, setPosts] = useState([]);
 const [reply, setReply] = useState("");
 
