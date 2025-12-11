@@ -41,13 +41,8 @@ savePosts(newPosts);
 };
 
 
-const top5 = [...posts]
-.sort((a, b) => b.likes - a.likes)
-.slice(0, 5);
-
-
 return (
-<main>
+<>
 <div className="glass">
 <h2>新規投稿</h2>
 <textarea
@@ -60,27 +55,14 @@ style={{ width: "100%" }}
 </div>
 
 
-<div className="glass" style={{ marginTop: 20 }}>
-<h2>🔥 いいねランキングTOP5</h2>
-{top5.map((p) => (
-<div key={p.id} style={{ marginBottom: 10 }}>
-<a href={`/post/${p.id}`}>{p.text}</a>
-<div>👍 {p.likes}</div>
-</div>
-))}
-</div>
-
-
-<div style={{ marginTop: 20 }}>
 <h2>タイムライン</h2>
 {posts.map((p) => (
-<div className="glass" key={p.id} style={{ marginBottom: 14 }}>
+<div className="glass" key={p.id}>
 <p>{p.text}</p>
 <button onClick={() => likePost(p.id)}>👍 {p.likes}</button>
 <a href={`/post/${p.id}`} style={{ marginLeft: 10 }}>返信</a>
 </div>
 ))}
-</div>
-</main>
+</>
 );
 }
